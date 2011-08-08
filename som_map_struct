@@ -1,0 +1,56 @@
+import math
+import datetime
+import random
+now = datetime.datetime.now()
+
+class som_map_struct:
+	def __init__(self, dim, name="",topol=[],msize=mat(""),lattice="",mapshape="",labels=[],neigh="",mask=mat(""),comp_names=[],comp_norm=[]):
+		self.type="som_map"
+		self.neigh=neigh
+		self.mask=mask
+		self.name=name
+		self.comp_names=comp_names
+		self.comp_norm=comp_norm
+		self.labels=labels
+		
+		if topol==[]:
+			sTopol=som_topol_struct(msize=msize, lattice=lattice, mapshape=mapshape)
+		else:
+			sTopol=topol	
+		
+		self.topol=sTopol	
+
+
+		self.codebook=zeros(( sTopol.msize[0,1]*sTopol.msize[0,0], dim) )
+		if mask.shape[1]==0:
+			self.mask=ones((dim,1))
+		
+		if neigh=="":
+			self.neigh="gaussian"
+
+		if name=="":
+			self.name='SOM ' + now.strftime("%Y-%m-%d %H:%M")	
+		
+		if labels==[]:
+			self.labels=[''] * sTopol.msize[0,0] *  sTopol.msize[0,1]
+ 		
+		if comp_norm==[]:
+			self.comp_norm=[''] * dim
+
+		if comp_names==[]:
+			self.comp_names=[''] * dim
+			for i in range(0,dim):
+				self.comp_names[i]='variable ' + str(i)
+			
+		sTrain=som_train_struct(time=now.strftime("%Y-%m-%d %H:%M"), mask=self.mask)
+		
+		sTrain.algorithm=""
+		sTrain.data_name=""
+		sTrain.neigh="gaussian"
+		sTrain.radius_ini=[]
+		sTrain.radius_fin=[]
+		sTrain.alpha_ini=[]
+		sTrain.alpha_type="inv"
+		sTrain.trainlen=[]
+		
+		self.trainhist=sTrain

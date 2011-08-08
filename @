@@ -1,0 +1,31 @@
+class som_data_struct:
+	def __init__(self, D, labels=[], name=[],comp_names=[],comp_norm=[], label_names=[]):
+		self.type="som_data"
+		self.data=D
+		self.labels=labels
+		self.name=name
+		self.comp_names=comp_names
+		self.comp_norm=comp_norm
+		self.label_names=label_names
+
+                dlen=D.shape[0]
+                dim=D.shape[1]
+
+		#defaults
+		if name==[]:
+			self.name="unnamed"
+
+		if labels==[]:
+			self.labels=['']*dlen
+
+
+		if comp_names==[]:
+			comp_names=['']*dim
+			for i in range(0,dim):
+				comp_names[i]='variable ' + str(i)
+
+		if comp_norm==[]:
+			comp_norm=['']*dim
+
+
+			

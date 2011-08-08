@@ -1,0 +1,152 @@
+class som_train_struct:
+	def __init__(self,data=[],data_name="",time="",dim=[],dlen=[],msize=[],munits=[],neigh="",phase="",algorithm="",mask=mat(""),previous=[]):
+		self.type="som_train"
+		self.algorithm=algorithm
+		self.data_name=data_name
+		self.neigh=neigh
+		self.mask=mask
+		self.radius_ini=[]
+		self.radius_fin=[]
+		self.alpha_ini=[]
+		self.alpha_type="inv"
+		self.trainlen=[]
+		self.time=time
+
+		if previous!=[]:
+			sTprev=previous
+		else:
+			sTprev=[]
+
+		if data==[]:
+			D=[]
+		else:
+			D=data
+			dlen=D.shape[0]
+			dim=D.shape[1]
+	
+		#dim
+		if sTprev!=[] and dim==[]:
+			dim=sTprev.mask.shape[0]	
+
+		#mask
+		if self.mask.shape[1]==0 and dim!=[]:
+			self.mask=ones((dim,1))
+
+		#msize, munits
+		if msize==[]:
+			msize = zeros(2)
+			msize[0]=10.0
+			msize[1]=10.0
+		else:
+			s=round(sqrt(munits))
+			msize[0]=s
+			msize[1]=round(munits/s)
+
+		munits=msize[0]*msize[1]
+
+		#previous training
+		prevalg=""
+		if sTprev!=[]:
+			if sTprev.algorithm=="lininit":
+				prevalg="init"
+			else:
+				prevalg=sTprev.algorithm
+		
+		#determine phase based on previous training
+		if phase=="":
+			if self.algorithm=="lininit" or self.algorithm=="randinit":
+				phase="init"
+			elif self.algorithm=="batch" or self.algorithm=="seq" or self.algorithm=="":
+				if sTprev==[]:
+					phase="rough"
+				elif prevalg=="init":
+					phase="rough"
+				else:
+					phase="finetune"
+			else:
+				phase="train"
+
+		#determine the algorithm
+		if self.algorithm=="":
+			if phase=="init":	
+				self.algorithm="lininit"
+			elif prevalg=="init" or prevalg=="":
+				self.algorithm="batch"
+			else:
+				self.algorithm = sTprev.algorithm
+
+		#mask
+		if self.mask.shape[1]==0:
+			if sTprev!=[]:
+				self.mask=sTprev.mask
+			elif dim!=[]:
+				self.mask=ones((dim,1))
+
+		#neighborhood function
+		if self.neigh=="":	
+			if sTprev!=[] and sTprev.neigh!="":
+				self.neigh=sTprev.neigh
+			else:
+				self.neigh="gaussian"
+		
+		if phase=="init":
+			self.alpha_ini=[]
+			self.alpha_type=""
+			self.radius_ini=[]
+			self.radius_fin=[]
+			self.trainlen=[]
+			self.neigh=""
+		else:
+			mode=phase + '-' + self.algorithm
+
+			#learning rate
+			if self.alpha_ini==[]:
+				if self.algorithm=="batch":
+					self.alpha_ini=[]
+				else:
+					if phase=="train" or phase=="rough":
+						self.alpha_ini=0.5
+					if phase=="finetune":
+						self.alpha_ini=0.05
+
+			if self.alpha_type=="":
+				if sTprev!=[] and self.alpha_type!="" and self.algorithm!="batch":
+					self.alpha_type = sTprev.alpha_type
+				elif self.algorithm=="seq":
+					self.alpha_type="inv"
+	
+			#radius
+			ms=max(msize)
+			if self.radius_ini==[]:
+				if sTprev==[] or sTprev.algorithm=="randinit":
+					self.radius_ini=max(1.0,ceil(ms/4))
+				elif sTprev.algorithm=="lininit" or sTprev.radius_fin==[]:
+					self.radius_ini=max(1.0,ceil(ms/8))
+				else:
+					self.radius_ini=sTprev.radius_fin
+
+
+			if self.radius_fin==[]:
+				if phase=="rough":
+					self.radius_fin=max(1.0,self.radius_ini/4.0)
+				else:
+					self.radius_fin=1.0
+
+
+			#trainlen
+			if self.trainlen==[]:			
+				if munits==[] or dlen==[]:
+					mpd=0.5
+				else:
+					mpd=float(munits/dlen)
+
+
+			if phase=="train":
+				self.trainlen=ceil(50.0*mpd)
+			elif phase=="rough":
+				self.trainlen=ceil(10.0*mpd)
+			elif phase=="finetune":
+				self.trainlen=ceil(40.0*mpd)
+			
+			self.trainlen=max(1.0,self.trainlen)
+					
