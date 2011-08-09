@@ -1,8 +1,14 @@
+from numpy import *
+import scipy as Sci
+import scipy.linalg
+
 import math
 import datetime
 import random
 now = datetime.datetime.now()
 
+execfile('som_topol_struct')
+execfile('som_train_struct')
 class som_map_struct:
 	def __init__(self, dim, name="",topol=[],msize=mat(""),lattice="",mapshape="",labels=[],neigh="",mask=mat(""),comp_names=[],comp_norm=[]):
 		self.type="som_map"
@@ -14,26 +20,29 @@ class som_map_struct:
 		self.labels=labels
 		
 		if topol==[]:
-			sTopol=som_topol_struct(msize=msize, lattice=lattice, mapshape=mapshape)
+			sTopol=som_topol_struct(lattice=lattice, mapshape=mapshape)
 		else:
 			sTopol=topol	
 		
-		self.topol=sTopol	
+		sTopol.msize=mat("0 0")
 
 
 		self.codebook=zeros(( sTopol.msize[0,1]*sTopol.msize[0,0], dim) )
 		if mask.shape[1]==0:
 			self.mask=ones((dim,1))
 		
+		if labels==[]:
+			self.labels=[''] * sTopol.msize[0,0] *  sTopol.msize[0,1]
+
+		sTopol.msize=mat("0")
+		self.topol=sTopol
+
 		if neigh=="":
 			self.neigh="gaussian"
 
 		if name=="":
 			self.name='SOM ' + now.strftime("%Y-%m-%d %H:%M")	
 		
-		if labels==[]:
-			self.labels=[''] * sTopol.msize[0,0] *  sTopol.msize[0,1]
- 		
 		if comp_norm==[]:
 			self.comp_norm=[''] * dim
 

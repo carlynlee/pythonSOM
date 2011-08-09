@@ -33,11 +33,11 @@ class som_topol_struct:
 		if msize.shape[1]==0: 
 			self.msize=mat("0 0")	
 			if dim==1: #one dimensional data
-				self.msize[0]=1
-				self.msize[1]=ceil(munits)
+				self.msize[0,0]=1
+				self.msize[0,1]=ceil(munits)
 			elif D.shape[0] < 2: #no data provided, determine msize using munits
-				self.msize[0]=round(sqrt(munits))
-				self.msize[1]=round(munits/self.msize[0])
+				self.msize[0,0]=round(sqrt(munits))
+				self.msize[0,1]=round(munits/self.msize[0,0])
 			else:	#determine a map size based on eigenvalues. 
 				#initialize xdim/ydim ratio using principal components of the input space; 
 				#the ratio is the square root of two largest eigenvalues	
@@ -64,17 +64,17 @@ class som_topol_struct:
 				
 	
 				if self.lattice=="hexa":
-					self.msize[1]=min(munits, round( sqrt(munits/ratio * sqrt(0.75))) )
+					self.msize[0,1]=min(munits, round( sqrt(munits/ratio * sqrt(0.75))) )
 				else:
-					self.msize[1]=min(munits, round(sqrt(munits/ratio)))
+					self.msize[0,1]=min(munits, round(sqrt(munits/ratio)))
 	
-				self.msize[0]=round(munits/self.msize[1])
+				self.msize[0,0]=round(munits/self.msize[0,1])
 	
 				if min(self.msize)==1:
-					self.msize[0]=1
-					self.msize[1]=max(self.msize)
+					self.msize[0,0]=1
+					self.msize[0,1]=max(self.msize)
 	
 				if self.lattice=="hexa" and self.mapshape=="toroid":
-					if self.msize[0]%2 ==1:
-						self.msize[0]=self.msize[0]+1
+					if self.msize[0,0]%2 ==1:
+						self.msize[0,0]=self.msize[0,0]+1
 		
