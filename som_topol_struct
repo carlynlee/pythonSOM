@@ -77,4 +77,5 @@ class som_topol_struct:
 				if self.lattice=="hexa" and self.mapshape=="toroid":
 					if self.msize[0,0]%2 ==1:
 						self.msize[0,0]=self.msize[0,0]+1
-		
+	
+	
