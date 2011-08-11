@@ -112,15 +112,21 @@ class som_map_struct:
 
 		if dlen<2:
 			sys.exit("Linear map initialization requires at least two samples")
-		sTopol=self.topol
-		
-		if len(sTopol.msize)==1:
+
+		sTopol=self.topol		
+		if sTopol.msize.shape[1]==1:
 			msize=sTopol.msize
 			sTopol.msize=mat("0 0")
 			sTopol.msize[0,0]=msize
 			sTopol.msize[0,1]=1
+
+
+		if sTopol.msize[0,0]==0 or sTopol.msize[0,1]==0:
+			sys.exit("map needs to be m x n")
 	
-		munits=sMap.codebook.shape[0]
+		self.topol=sTopol
+
+		munits=self.codebook.shape[0]
 		dim2=self.codebook.shape[1]
 		
 		if dim2!=dim:
@@ -133,9 +139,9 @@ class som_map_struct:
 		mdim=msize.shape[1]
 		munits= msize[0,0] * msize[0,1]
 
-		nonzeromapdim=0;
+		nonzeromapdim=0
 		for i in range(0,mdim):
-			if msize[0,i]>0:
+			if msize[0,i]>1:
 				nonzeromapdim=nonzeromapdim+1 
 		
 		if dim > 1 and nonzeromapdim>1:
@@ -155,9 +161,22 @@ class som_map_struct:
 			eigval=S
 			ind=argsort(-1*eigval)
 			eigval=eigval[ind,:]
-			V=V[ind,:]
-		
-		
-		
-		
+			V=V[:,ind]
+			V=V[:,0:mdim]
+			eigval=eigval[0:mdim]
 			
+			for i in range(0,mdim):
+				V[:,i]=V[:,i]/sqrt(dot(V[:,i],V[:,i])) * sqrt(eigval[i])
+		else:
+			inds=arange(0.,dlen)[:, newaxis] 
+			me=zeros((1,dim))
+			V=zeros((1,dim))
+			for i in range(0,dim):
+				me[i]=mean(D(inds,i),1)
+				V[i]=std(D[inds,i])
+
+
+		
+	if dim>1:
+		self.codebook=me*ones((munits,1))
+		Coord=som_			
